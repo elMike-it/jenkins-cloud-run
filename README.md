@@ -17,3 +17,9 @@
 ## 3. Create Secret File
 
 - Secret file: key.json
+
+## 4. Installing plugins
+
+- Docker Pipeline
+- Google Cloud SDK
+
