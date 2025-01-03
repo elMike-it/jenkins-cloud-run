@@ -13,15 +13,7 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh """
-                    docker build -t ${IMAGE_NAME} .
-                    """
-                }
-            }
-        }
+
         stage('Authenticate with GCP') {
             steps {
                 script {
@@ -37,6 +29,26 @@ pipeline {
                 }
             }
         }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh """
+                    docker build -t ${IMAGE_NAME} .
+                    """
+                }
+            }
+        }
+
+        stage('Push to Artifact Registry') {
+            steps {
+                script {
+                    // Subir la imagen al Artifact Registry
+                    sh "docker push ${IMAGE_NAME}"
+                }
+            }
+        }        
+
         stage('Push Docker Image to GCR') {
             steps {
                 script {
