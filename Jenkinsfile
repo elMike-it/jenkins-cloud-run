@@ -39,14 +39,26 @@ pipeline {
                 }
             }
         }
-
-
-        stage('Push Docker Image to GCR') {
+        stage('Create Artifact Registry Repo') {
             steps {
                 script {
                     sh """
-                    gcloud auth configure-docker --quiet
-                    docker push ${IMAGE_NAME}
+                    gcloud artifacts repositories describe ${SERVICE_NAME}-repo --location=${REPO_LOCATION} || \
+                    gcloud artifacts repositories create ${SERVICE_NAME}-repo \
+                        --repository-format=docker \
+                        --location=${REPO_LOCATION} \
+                        --description="Docker repo for ${SERVICE_NAME}"
+                    """
+                }
+            }
+        }
+        stage('Push Docker Image to Artifact Registry') {
+            steps {
+                script {
+                    sh """
+                    gcloud auth configure-docker ${REPO_LOCATION}-docker.pkg.dev --quiet
+                    docker tag ${IMAGE_NAME} ${REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${SERVICE_NAME}-repo/${SERVICE_NAME}
+                    docker push ${REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${SERVICE_NAME}-repo/${SERVICE_NAME}
                     """
                 }
             }
@@ -56,7 +68,7 @@ pipeline {
                 script {
                     sh """
                     gcloud run deploy ${SERVICE_NAME} \
-                        --image ${IMAGE_NAME} \
+                        --image ${REPO_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${SERVICE_NAME}-repo/${SERVICE_NAME} \
                         --region ${REGION} \
                         --platform managed \
                         --allow-unauthenticated
