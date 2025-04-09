@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         PROJECT_ID = 'test-interno-trendit'
-        SERVICE_NAME = 'mike-cloud-run-service'
+        SERVICE_NAME = 'mike-cloud-run-service-push'
         REGION = 'us-central1' // e.g., us-central1
         IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}"
         GCP_KEYFILE = credentials('gcp-service-account-key') // Configurado en Jenkins
